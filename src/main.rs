@@ -1,23 +1,22 @@
 pub mod lib;
 
-use diesel::prelude::*;
-
-use crate::lib::db::models::Users;
+use crate::lib::db::queries::user_queries;
 
 fn main() {
-    use self::lib::db::schema::users::dsl::*;
-
     let connection = &mut lib::db::establish_connection();
-    let results = users
-        .limit(5)
-        .select(Users::as_select())
-        .load(connection)
-        .expect("Error loading users");
-
-    println!("Displaying {} users", results.len());
-    for user in results {
-        println!("{}", user.username);
-        println!("{:?}", user.id);
-        println!("-----------\n");
+    let username = "Gioo";
+    match user_queries::create_user(connection, username) {
+        Ok(_) => println!("Welcome, {username}!"),
+        Err(error) => println!("Cannot insert user {username}, {error:?}"),
+    }
+    match user_queries::load_users(connection) {
+        Ok(all_users) => {
+            println!("Found {} users.", all_users.len());
+            for user in all_users {
+                println!("{:?} -> {}", user.id, user.username);
+                println!("-----------\n");
+            }
+        }
+        Err(_) => (),
     }
 }

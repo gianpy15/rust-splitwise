@@ -2,10 +2,10 @@ use crate::lib::db::schema::users;
 use diesel::prelude::*;
 
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::lib::db::schema::users)]
+#[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Users {
-    pub id: Option<i32>,
+    pub id: i32,
     pub username: String,
 }
 
