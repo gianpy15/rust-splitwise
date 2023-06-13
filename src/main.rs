@@ -1,14 +1,11 @@
-pub mod lib;
-
-use crate::lib::db::queries::user_queries;
-
+use splitwise::{cli, context};
+use splitwise::db::establish_connection;
+use splitwise::db::queries::user_queries;
 fn main() {
-    let connection = &mut lib::db::establish_connection();
-    let username = "Gioo";
-    match user_queries::create_user(connection, username) {
-        Ok(_) => println!("Welcome, {username}!"),
-        Err(error) => println!("Cannot insert user {username}, {error:?}"),
-    }
+    let connection = &mut establish_connection();
+    let mut context: context::Context = Default::default();
+    cli::user_mngmt::welcome(&mut context);
+    
     match user_queries::load_users(connection) {
         Ok(all_users) => {
             println!("Found {} users.", all_users.len());

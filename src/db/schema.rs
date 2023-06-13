@@ -1,8 +1,9 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    users (id) {
+    user (id) {
         id -> Integer,
         username -> Text,
+        balance -> Double,
     }
 }

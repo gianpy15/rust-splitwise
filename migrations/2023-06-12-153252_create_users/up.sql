@@ -1,5 +1,6 @@
 -- Your SQL goes here
-CREATE TABLE users (
+CREATE TABLE user (
   id INTEGER PRIMARY KEY NOT NULL,
-  username VARCHAR NOT NULL UNIQUE
+  username VARCHAR NOT NULL UNIQUE,
+  balance NUMBER DEFAULT 0 NOT NULL
 )

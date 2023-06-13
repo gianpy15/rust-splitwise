@@ -627,16 +627,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "436b050e76ed2903236f032a59761c1eb99e1b0aead2c257922771dab1fc8c78"
 
 [[package]]
-name = "rust-splitwise"
-version = "0.1.0"
-dependencies = [
- "diesel",
- "diesel_cli",
- "dotenvy",
- "inquire",
-]
-
-[[package]]
 name = "rustix"
 version = "0.37.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -730,6 +720,16 @@ name = "smallvec"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
+
+[[package]]
+name = "splitwise"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel_cli",
+ "dotenvy",
+ "inquire",
+]
 
 [[package]]
 name = "strsim"
