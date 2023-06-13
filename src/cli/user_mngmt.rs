@@ -7,6 +7,7 @@ use crate::db::establish_connection;
 use crate::db::queries::user_queries;
 
 use super::base::CliAction;
+use super::clear_console;
 use crate::context;
 
 #[derive(PartialEq, Eq)]
@@ -26,22 +27,26 @@ impl CliAction for UserAction {
                 match user_queries::get_user(connection, username.as_str()) {
                     Ok(user) => {
                         ctx.logged_user = Some(user);
+                        clear_console();
                         println!("Welcome back {}!", username)
                     }
                     Err(_) => println!("Username not found."),
                 }
             },
-            UserAction::Logout => ctx.logged_user = None,
-            UserAction::Register => loop {
+            UserAction::Logout => {
+                clear_console();
+                ctx.logged_user = None
+            },
+            UserAction::Register => {
                 let username = Text::new("What is your username?").prompt()?;
                 match user_queries::create_user(connection, username.as_str()) {
                     Ok(_) => {
                         let user = user_queries::get_user(connection, username.as_str())?;
                         ctx.logged_user = Some(user);
+                        clear_console();
                         println!("Welcome {}!", username);
-                        break;
                     }
-                    Err(_) => println!("Username already present.")
+                    Err(_) => println!("Username already present."),
                 }
             },
             UserAction::Exit => (),
@@ -72,6 +77,7 @@ impl UserAction {
 }
 
 pub fn welcome(ctx: &mut context::Context) -> Result<(), Box<dyn Error>> {
+    println!("Welcome to Rust Splitwise!");
     loop {
         let options = UserAction::get_options(ctx);
         let action = Select::new("What do you want to do?", options).prompt()?;

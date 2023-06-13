@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::db::schema::user;
 use diesel::prelude::*;
 
@@ -14,4 +16,13 @@ pub struct User {
 #[diesel(table_name = user)]
 pub struct NewUser<'a> {
     pub username: &'a str,
+}
+
+impl Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{} ->\t{}", self.id, self.username)?;
+        writeln!(f, "\tBalance: {}", self.balance)?;
+        writeln!(f, "-----------\n")?;
+        Ok(())
+    }
 }
