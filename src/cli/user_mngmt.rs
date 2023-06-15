@@ -11,14 +11,14 @@ use super::clear_console;
 use crate::context;
 
 #[derive(PartialEq, Eq)]
-enum UserAction {
+pub enum UserAction {
     Login,
     Logout,
     Register,
-    Exit
+    Back,
 }
 
-impl CliAction for UserAction {
+impl CliAction<UserAction> for UserAction {
     fn perform_action(&self, ctx: &mut context::Context) -> Result<(), Box<dyn Error>> {
         let connection = &mut establish_connection();
         match self {
@@ -32,11 +32,11 @@ impl CliAction for UserAction {
                     }
                     Err(_) => println!("Username not found."),
                 }
-            },
+            }
             UserAction::Logout => {
                 clear_console();
                 ctx.logged_user = None
-            },
+            }
             UserAction::Register => {
                 let username = Text::new("What is your username?").prompt()?;
                 match user_queries::create_user(connection, username.as_str()) {
@@ -48,11 +48,18 @@ impl CliAction for UserAction {
                     }
                     Err(_) => println!("Username already present."),
                 }
-            },
-            UserAction::Exit => (),
+            }
+            UserAction::Back => (),
         }
 
         Ok(())
+    }
+
+    fn get_options(ctx: &mut context::Context) -> Vec<UserAction> {
+        match ctx.logged_user {
+            Some(_) => vec![UserAction::Logout, UserAction::Back],
+            None => vec![UserAction::Login, UserAction::Register, UserAction::Back],
+        }
     }
 }
 
@@ -62,29 +69,7 @@ impl Display for UserAction {
             UserAction::Login => write!(f, "Login"),
             UserAction::Logout => write!(f, "Logout"),
             UserAction::Register => write!(f, "Register"),
-            UserAction::Exit => write!(f, "Exit"),
+            UserAction::Back => write!(f, "Back"),
         }
     }
-}
-
-impl UserAction {
-    fn get_options(ctx: &context::Context) -> Vec<UserAction> {
-        match ctx.logged_user {
-            Some(_) => vec![UserAction::Logout, UserAction::Exit],
-            None => vec![UserAction::Login, UserAction::Register, UserAction::Exit],
-        }
-    }
-}
-
-pub fn welcome(ctx: &mut context::Context) -> Result<(), Box<dyn Error>> {
-    println!("Welcome to Rust Splitwise!");
-    loop {
-        let options = UserAction::get_options(ctx);
-        let action = Select::new("What do you want to do?", options).prompt()?;
-        action.perform_action(ctx)?;
-        if action == UserAction::Exit {
-            break;
-        }
-    }
-    Ok(())
 }
