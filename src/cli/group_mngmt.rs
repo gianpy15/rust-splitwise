@@ -1,7 +1,9 @@
 use std::error::Error;
 use std::fmt::Display;
 
-use inquire::{Select, Text};
+use inquire::Select;
+
+use inquire::Text;
 
 use crate::db::establish_connection;
 use crate::db::queries::group_queries;
@@ -28,18 +30,33 @@ impl CliAction<GroupAction> for GroupAction {
                 match group_queries::create_group(connection, group_name.as_str()) {
                     Ok(_) => {
                         let group = group_queries::get_group(connection, group_name.as_str())?;
-                        ctx.selected_group = Some(group);
+                        ctx.set_group(&Some(group));
                         clear_console();
                         println!("Group {} created!", group_name);
                     }
-                    Err(_) => println!("Group already present."),
+                    Err(_) => {
+                        let _ = Select::new("Group already present.", vec!["Back"]).prompt();
+                        return Ok(());
+                    }
                 }
 
-                group_queries::add_user_to_group(connection, &ctx.logged_user.as_ref().unwrap().id, &ctx.selected_group.as_ref().unwrap().id)?;
+                group_queries::add_user_to_group(
+                    connection,
+                    &ctx.get_logged_user().as_ref().unwrap().id,
+                    &ctx.get_selected_group().as_ref().unwrap().id,
+                )?;
             }
-            GroupAction::Delete => {
-            }
+            GroupAction::Delete => {}
             GroupAction::Select => {
+                let group = Select::new(
+                    "Choose a group:",
+                    group_queries::get_user_groups(
+                        connection,
+                        &ctx.get_logged_user().clone().unwrap(),
+                    )?,
+                )
+                .prompt()?;
+                ctx.set_group(&Some(group))
             }
             GroupAction::AddMember => (),
             GroupAction::Back => (),
@@ -48,8 +65,13 @@ impl CliAction<GroupAction> for GroupAction {
         Ok(())
     }
 
-    fn get_options(ctx: &mut context::Context) -> Vec<GroupAction> {
-        vec![GroupAction::Create, GroupAction::Delete, GroupAction::Select, GroupAction::AddMember]
+    fn get_options(_: &mut context::Context) -> Vec<GroupAction> {
+        vec![
+            GroupAction::Create,
+            GroupAction::Delete,
+            GroupAction::Select,
+            GroupAction::AddMember,
+        ]
     }
 }
 

@@ -5,7 +5,8 @@ CREATE TABLE split_group (
 );
 
 CREATE TABLE group_to_user (
-    group_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    PRIMARY KEY (group_id, user_id)
+    id INTEGER PRIMARY KEY NOT NULL,
+    group_id INTEGER NOT NULL REFERENCES split_group(id),
+    user_id INTEGER NOT NULL REFERENCES user(id),
+    UNIQUE (group_id, user_id)
 );

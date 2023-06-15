@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::Display;
 
-use inquire::{Select, Text};
+use inquire::Text;
 
 use crate::db::establish_connection;
 use crate::db::queries::user_queries;
@@ -26,7 +26,7 @@ impl CliAction<UserAction> for UserAction {
                 let username = Text::new("What is your username?").prompt()?;
                 match user_queries::get_user(connection, username.as_str()) {
                     Ok(user) => {
-                        ctx.logged_user = Some(user);
+                        ctx.set_user(&Some(user));
                         clear_console();
                         println!("Welcome back {}!", username)
                     }
@@ -35,14 +35,14 @@ impl CliAction<UserAction> for UserAction {
             }
             UserAction::Logout => {
                 clear_console();
-                ctx.logged_user = None
+                ctx.set_user(&None)
             }
             UserAction::Register => {
                 let username = Text::new("What is your username?").prompt()?;
                 match user_queries::create_user(connection, username.as_str()) {
                     Ok(_) => {
                         let user = user_queries::get_user(connection, username.as_str())?;
-                        ctx.logged_user = Some(user);
+                        ctx.set_user(&Some(user));
                         clear_console();
                         println!("Welcome {}!", username);
                     }
@@ -56,7 +56,7 @@ impl CliAction<UserAction> for UserAction {
     }
 
     fn get_options(ctx: &mut context::Context) -> Vec<UserAction> {
-        match ctx.logged_user {
+        match ctx.get_logged_user() {
             Some(_) => vec![UserAction::Logout, UserAction::Back],
             None => vec![UserAction::Login, UserAction::Register, UserAction::Back],
         }

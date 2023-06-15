@@ -3,7 +3,7 @@ pub mod user {
 
     use crate::db::schema::user;
     use diesel::prelude::*;
-    #[derive(Queryable, Selectable)]
+    #[derive(Queryable, Identifiable, Selectable, Clone)]
     #[diesel(table_name = user)]
     #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
     pub struct User {
@@ -30,10 +30,11 @@ pub mod user {
 pub mod group {
     use std::fmt::Display;
 
+    use super::user::User;
     use crate::db::schema::{group_to_user, split_group};
     use diesel::prelude::*;
 
-    #[derive(Queryable, Selectable)]
+    #[derive(Queryable, Selectable, Identifiable, Clone)]
     #[diesel(table_name = split_group)]
     #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
     pub struct Group {
@@ -49,16 +50,17 @@ pub mod group {
 
     impl Display for Group {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            writeln!(f, "{} ->\t{}", self.id, self.name)?;
-            writeln!(f, "-----------\n")?;
-            Ok(())
+            write!(f, "{}", self.name)
         }
     }
 
-    #[derive(Queryable, Selectable)]
+    #[derive(Queryable, Identifiable, Associations, Selectable)]
+    #[diesel(belongs_to(Group))]
+    #[diesel(belongs_to(User))]
     #[diesel(table_name = group_to_user)]
     #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
     pub struct GroupToUser {
+        pub id: i32,
         pub group_id: i32,
         pub user_id: i32,
     }
